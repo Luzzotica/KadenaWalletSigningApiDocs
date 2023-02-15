@@ -93,6 +93,7 @@ components:
           items: {}
       required:
         - name
+        - args
     SignerCapability:
       type: object
       properties:
@@ -172,8 +173,7 @@ components:
           nullable: true
         sig:
           type: string
-      required:
-        - sig
+          nullable: true
       example:
         pubKey: '0x123456789abcdef'
         sig: '0xabcdef123456789'
@@ -216,6 +216,10 @@ components:
               type: array
               items:
                 type: string
+      required:
+        - role
+        - description
+        - cap
     SigningRequest:
       type: object
       properties:
@@ -238,7 +242,20 @@ components:
         ttl:
           type: number
         caps:
-          $ref: '#/components/schemas/DappCap'
+          type: array
+          items: 
+            $ref: '#/components/schemas/DappCap'
+      required:
+        - pactCode
+        - envData
+        - sender
+        - networkId
+        - chainId
+        - gasLimit
+        - gasPrice
+        - signingPubKey
+        - ttl
+        - caps
     SignedCommand:
       type: object
       properties:
@@ -247,12 +264,13 @@ components:
         sigs:
           type: array
           items:
-            type: object
-            properties:
-              sig:
-                type: string
+            $ref: '#/components/schemas/Signer'
         cmd:
           type: string
+      required:
+        - hash
+        - sigs
+        - cmd
     QuicksignRequest:
       type: object
       properties:
@@ -260,15 +278,8 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CommandSigData'
-    QuicksignResponse:
-      type: object
-      properties:
-        responses:
-          type: array
-          items:
-            $ref: '#/components/schemas/QuicksignResult'
-        error:
-          $ref: '#/components/schemas/QuicksignError'
+      required:
+        - commandSigDatas
     CommandSigData:
       type: object
       properties:
@@ -277,7 +288,10 @@ components:
         sigs:
           type: array
           items:
-            $ref: '#/components/schemas/QuicksignSigner'
+            $ref: '#/components/schemas/Signer'
+      required:
+        - cmd
+        - sigs
       example:
         commandSigDatas:
         - sigs:
@@ -287,35 +301,6 @@ components:
             - pubKey: "d61c2b4d8151cd0a7599790a6a905a96dc1028b5e61181e08104e60f28ad8997"
               sig: "a41b1c481414b0a0bac27c1f95f03d058cf1dc7ace571cf7b7a74be34e90116096dac8744adc0b94ffc16241cc87f513ea7f999802b3b6e58a1139c56881f800"
           cmd: "{\"networkId\":\"testnet04\",\"payload\":{\"exec\":{\"data\":null,\"code\":\"(enforce-keyset (read-keyset 'ks))\"}},\"signers\":[{\"pubKey\":\"ae18efd16cbd49e9a92552a2589ac01491b486fbcbb1e3f07980f945597e2033\"},{\"pubKey\":\"fa781bdd858cd2380b5e2b654e58035f7189a6e8158686a1bb7eabb585a56e7f\"},{\"pubKey\":\"d61c2b4d8151cd0a7599790a6a905a96dc1028b5e61181e08104e60f28ad8997\"}],\"meta\":{\"creationTime\":1664393516,\"ttl\":1800,\"gasLimit\":100,\"chainId\":\"0\",\"gasPrice\":1.0e-6,\"sender\":\"k:ae18efd16cbd49e9a92552a2589ac01491b486fbcbb1e3f07980f945597e2033\"},\"nonce\":\"2022-09-28 19:31:56.965212 UTC\"}"
-
-    QuicksignSigner:
-      type: object
-      properties:
-        pubKey:
-          type: string
-        sig:
-          type: string
-          nullable: true
-    QuicksignResult:
-      type: object
-      properties:
-        commandSigData:
-          type: object
-          properties:
-            commandPayload:
-              type: string
-            signerList:
-              type: array
-              items:
-                type: object
-                properties:
-                  pubKey:
-                    type: string
-                  sig:
-                    type: string
-                    nullable: true
-        outcome:
-          $ref: '#/components/schemas/QuicksignOutcome'
     QuicksignOutcome:
       type: object
       properties:
@@ -327,6 +312,27 @@ components:
         msg:
           type: string
           nullable: true
+      required:
+        - result
+        - hash
+        - msg
+    QuicksignResult:
+      type: object
+      properties:
+        commandSigData:
+          type: object
+          properties:
+            commandPayload:
+              type: string
+            signerList:
+              type: array
+              items:
+                ref: '#/components/schemas/Signer'
+        outcome:
+          $ref: '#/components/schemas/QuicksignOutcome'
+      required:
+        - commandSigData
+        - outcome
     QuicksignError:
       type: object
       properties:
@@ -335,5 +341,18 @@ components:
           enum: ['reject', 'emptyList', 'other']
         msg:
           type: string
+          nullable: true
+      required:
+        - type
+    QuicksignResponse:
+      type: object
+      properties:
+        responses:
+          type: array
+          items:
+            $ref: '#/components/schemas/QuicksignResult'
+          nullable: true
+        error:
+          $ref: '#/components/schemas/QuicksignError'
           nullable: true
 
