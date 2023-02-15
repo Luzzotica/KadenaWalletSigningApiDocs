@@ -16,4 +16,4 @@ Currently, all of the models are there, and the `\sign` and `\quicksign` endpoin
 The things that still need doing:
 
 - Examples, specifically of things like continuation commands
-- Descriptions of each schema component and how their purpose
+- Improved descriptions

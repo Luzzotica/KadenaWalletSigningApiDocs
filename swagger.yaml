@@ -49,6 +49,7 @@ components:
   schemas:
     ExecMessage:
       type: object
+      description: An exec message. Used to execute pact code directly.
       properties:
         data:
           type: object
@@ -59,6 +60,7 @@ components:
         - code
     ContinuationMessage:
       type: object
+      description: A continuation message. Used to execute a step in a defpact.
       properties:
         pactId:
           type: string
@@ -78,17 +80,23 @@ components:
         - proof
     CommandPayload:
       type: object
+      description: A continuation or exec command. One or the other must exist or it is invalid.
       properties:
         exec:
           $ref: '#/components/schemas/ExecMessage'
+          nullable: true
         cont:
           $ref: '#/components/schemas/ContinuationMessage'
+          nullable: true
     Capability:
       type: object
+      description: A Pact capability.
       properties:
         name:
+          description: The name of the capability, e.g. coin.TRANSFER
           type: string
         args:
+          description: The arguments for the capability
           type: array
           items: {}
       required:
@@ -96,6 +104,7 @@ components:
         - args
     SignerCapability:
       type: object
+      description: The public key of a signer, and the corresponding capabilities that public key has during the transaction.
       properties:
         pubKey:
           type: string
@@ -110,16 +119,22 @@ components:
       type: object
       properties:
         chainId:
+          description: 'The chain id of the chain the command is being sent to: 0, 1, 15, 19'
           type: string
         gasLimit:
+          description: The gas limit for the command
           type: integer
         gasPrice:
+          description: The gas price for the command
           type: integer
         sender:
+          description: The account of the gas payer
           type: string
         ttl:
+          description: The time to live for the command
           type: integer
         creationTime:
+          description: The creation time of the command
           type: integer
       required:
         - chainId
@@ -130,6 +145,7 @@ components:
         - creationTime
     PactCommandPayload:
       type: object
+      description: A payload for a pact command.
       properties:
         payload:
           $ref: '#/components/schemas/CommandPayload'
@@ -167,6 +183,7 @@ components:
         nonce: nonce-value
     Signer:
       type: object
+      description: A signer of a pact command. Set the public key null if using with the PactCommandPayload. Set the signature null if used in the CommandSigData.
       properties:
         pubKey:
           type: string
@@ -175,16 +192,20 @@ components:
           type: string
           nullable: true
       example:
-        pubKey: '0x123456789abcdef'
-        sig: '0xabcdef123456789'
+        pubKey: 'ceb59748b4de3e69c1e100a62035a6aa5e0126bcae263b71ccf012b30f7f6903'
+        sig: '756ec1891523f56369c98bf2544a2f91033de9cea53773d7cc4d7812babd9a1d0ab03b706e628bd1636fb5d65083711ba6584bf6ffe471a48657e6a571031306'
     PactCommand:
       type: object
+      description: A pact command. Used with the /send and /local endpoints of a Chainweb Node.
       properties:
         cmd:
+          description: The JSON stringified PactCommmandPayload
           type: string
         hash:
+          description: The blake2b base64 url safe hash of the command
           type: string
         sigs:
+          description: The list of Signers with only the sig field set
           type: array
           items:
             $ref: '#/components/schemas/Signer'
@@ -202,6 +223,7 @@ components:
           "nonce":"nonce-value"}'
     DappCap:
       type: object
+      description: The Capability sent from a Dapp to the wallet on the /sign endpoint. Role and description are used to display info to the user. Cap is the actual capability.
       properties:
         role:
           type: string
@@ -222,6 +244,7 @@ components:
         - cap
     SigningRequest:
       type: object
+      description: The object sent to the /sign endpoint of the wallet. The wallet will construct the PactCommandPayload, hash it, sign it, and return the PactCommand.
       properties:
         pactCode:
           type: string
@@ -256,23 +279,11 @@ components:
         - signingPubKey
         - ttl
         - caps
-    SignedCommand:
-      type: object
-      properties:
-        hash:
-          type: string
-        sigs:
-          type: array
-          items:
-            $ref: '#/components/schemas/Signer'
-        cmd:
-          type: string
-      required:
-        - hash
-        - sigs
-        - cmd
     QuicksignRequest:
       type: object
+      description: The object sent to the /quicksign endpoint of the wallet. |
+        The wallet will loop through each commandSigData, sign it if it can, add the sig to the Signer |
+        and return the CommandSigData with the QuicksignOutcome as a QuicksignResult.
       properties:
         commandSigDatas:
           type: array
@@ -282,11 +293,13 @@ components:
         - commandSigDatas
     CommandSigData:
       type: object
+      description: Has a JSON stringifie PactCommandPayload and the requested signatures.
       properties:
         cmd:
           type: string
         sigs:
           type: array
+          description: The list of Signers with the public field set. Missing sig means that signature hasn't been acquired yet.
           items:
             $ref: '#/components/schemas/Signer'
       required:
@@ -303,6 +316,7 @@ components:
           cmd: "{\"networkId\":\"testnet04\",\"payload\":{\"exec\":{\"data\":null,\"code\":\"(enforce-keyset (read-keyset 'ks))\"}},\"signers\":[{\"pubKey\":\"ae18efd16cbd49e9a92552a2589ac01491b486fbcbb1e3f07980f945597e2033\"},{\"pubKey\":\"fa781bdd858cd2380b5e2b654e58035f7189a6e8158686a1bb7eabb585a56e7f\"},{\"pubKey\":\"d61c2b4d8151cd0a7599790a6a905a96dc1028b5e61181e08104e60f28ad8997\"}],\"meta\":{\"creationTime\":1664393516,\"ttl\":1800,\"gasLimit\":100,\"chainId\":\"0\",\"gasPrice\":1.0e-6,\"sender\":\"k:ae18efd16cbd49e9a92552a2589ac01491b486fbcbb1e3f07980f945597e2033\"},\"nonce\":\"2022-09-28 19:31:56.965212 UTC\"}"
     QuicksignOutcome:
       type: object
+      description: The outcome of the quicksign operation on a single CommandSigData.
       properties:
         result:
           type: string
@@ -318,16 +332,10 @@ components:
         - msg
     QuicksignResult:
       type: object
+      description: The result of the quicksign operation on a single CommandSigData. Contains a CommandSigData and a QuicksignOutcome.
       properties:
         commandSigData:
-          type: object
-          properties:
-            commandPayload:
-              type: string
-            signerList:
-              type: array
-              items:
-                ref: '#/components/schemas/Signer'
+          $ref: '#/components/schemas/CommandSigData'
         outcome:
           $ref: '#/components/schemas/QuicksignOutcome'
       required:
@@ -335,6 +343,7 @@ components:
         - outcome
     QuicksignError:
       type: object
+      description: The error that occurred during the quicksign operation.
       properties:
         type:
           type: string
@@ -346,6 +355,8 @@ components:
         - type
     QuicksignResponse:
       type: object
+      description: The response from the /quicksign endpoint of the wallet. Contains either a list of QuicksignResults or a QuicksignError. |
+        One of the two must exist or it is an invalid response.
       properties:
         responses:
           type: array
