@@ -281,8 +281,8 @@ components:
         - caps
     QuicksignRequest:
       type: object
-      description: The object sent to the /quicksign endpoint of the wallet. |
-        The wallet will loop through each commandSigData, sign it if it can, add the sig to the Signer |
+      description: The object sent to the /quicksign endpoint of the wallet.
+        The wallet will loop through each commandSigData, sign it if it can, add the sig to the Signer
         and return the CommandSigData with the QuicksignOutcome as a QuicksignResult.
       properties:
         commandSigDatas:
@@ -355,7 +355,7 @@ components:
         - type
     QuicksignResponse:
       type: object
-      description: The response from the /quicksign endpoint of the wallet. Contains either a list of QuicksignResults or a QuicksignError. |
+      description: The response from the /quicksign endpoint of the wallet. Contains either a list of QuicksignResults or a QuicksignError.
         One of the two must exist or it is an invalid response.
       properties:
         responses:
